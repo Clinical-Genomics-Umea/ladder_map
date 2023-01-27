@@ -3,3 +3,4 @@ networkx
 pandas
 bio
 scipy
+scikit-learn

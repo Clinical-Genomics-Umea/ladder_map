@@ -1,9 +1,16 @@
+import matplotlib.pyplot as plt
+import pandas as pd
 import numpy as np
 import networkx as nx
 from scipy import stats, signal
 import pandas as pd
 from Bio import SeqIO
 from sklearn.linear_model import LinearRegression
+from scipy.signal import find_peaks, peak_widths
+from scipy.integrate import simpson
+
+from collections import namedtuple
+from typing import NamedTuple
 
 
 class LadderMap:
@@ -136,17 +143,104 @@ class LadderMap:
     def _fit_linear_model(self):
         self.linear_model = LinearRegression()
         self.linear_model.fit(self.best_correlated_peaks.reshape(-1, 1), self.ladder)
-        
-    
+
     def adjusted_step_dataframe(self, channel: str = "DATA1") -> pd.DataFrame:
         df = (
             pd.DataFrame({"peaks": self.data[channel]})
             .reset_index()
             .rename(columns={"index": "step_raw"})
             .assign(
-                step_adjusted=lambda x: self.linear_model.predict(x.step_raw.to_numpy().reshape(-1, 1))
+                step_adjusted=lambda x: self.linear_model.predict(
+                    x.step_raw.to_numpy().reshape(-1, 1)
+                )
             )
             .loc[lambda x: x.step_adjusted >= 0]
         )
-        
+
         return df
+
+
+class PeakArea:
+    def __init__(
+        self, data: pd.DataFrame, start: int, end: int, rel_height: float = 0.95
+    ) -> None:
+        self.data = data
+        self.find_fragment_peaks(start=start, end=end)
+        self.widths = self._find_fragment_peak_width(rel_height=rel_height)
+
+    def find_fragment_peaks(
+        self, start, end, num_peaks: int = 2, threshold: int = 10000
+    ):
+        data = self.data.loc[lambda x: x.step_adjusted >= start].loc[
+            lambda x: x.step_adjusted <= end
+        ]
+
+        peaks, _ = find_peaks(data.peaks, height=threshold)
+        while len(peaks) != num_peaks:
+            # more peaks
+            if len(peaks) > num_peaks:
+                threshold += threshold / 2
+                peaks, _ = find_peaks(data.peaks, height=threshold)
+            # less peaks
+            else:
+                threshold -= threshold / 2
+                peaks, _ = find_peaks(data.peaks, height=threshold)
+
+        self.peaks_index = peaks
+        self.peaks_dataframe = data
+
+    def _find_fragment_peak_width(self, rel_height: float = 0.95):
+        widths = peak_widths(
+            self.peaks_dataframe.peaks,
+            self.peaks_index,
+            rel_height=rel_height,
+        )
+        return widths
+
+    def plot_peak_widths(self):
+        self.peaks_dataframe.plot("step_adjusted", "peaks")
+        plt.plot(
+            self.peaks_dataframe.step_adjusted.iloc[self.peaks_index],
+            self.peaks_dataframe.peaks.iloc[self.peaks_index],
+            "o",
+        )
+
+        plt.hlines(
+            y=self.widths[1][0],
+            xmin=self.peaks_dataframe.step_adjusted.iloc[
+                self.widths[2][0].round().astype(int)
+            ],
+            xmax=self.peaks_dataframe.step_adjusted.iloc[
+                self.widths[3][0].round().astype(int)
+            ],
+            color="C3",
+        )
+
+        plt.hlines(
+            y=self.widths[1][1],
+            xmin=self.peaks_dataframe.step_adjusted.iloc[
+                self.widths[2][1].round().astype(int)
+            ],
+            xmax=self.peaks_dataframe.step_adjusted.iloc[
+                self.widths[3][1].round().astype(int)
+            ],
+            color="C4",
+        )
+
+    def calculate_peak_area(self, function: callable = "simpson") -> NamedTuple:
+        data = self.peaks_dataframe.peaks.to_numpy()
+        left_start, right_start = self.widths[2].round().astype(int)
+        left_end, right_end = self.widths[3].round().astype(int)
+
+        if function == "simpson":
+            left_area = simpson(data[left_start:left_end])
+            right_area = simpson(data[right_start:right_end])
+            quotient = right_area / left_area
+        elif function == "trapz":
+            left_area = np.trapz(data[left_start:left_end])
+            right_area = np.trapz(data[right_start:right_end])
+            quotient = right_area / left_area
+
+        Area = namedtuple("Area", "left_area right_area area_quotient")
+
+        return Area(left_area, right_area, quotient)

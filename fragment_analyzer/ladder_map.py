@@ -2,7 +2,6 @@ import numpy as np
 import networkx as nx
 from scipy import stats, signal
 import pandas as pd
-from pathlib import Path
 from Bio import SeqIO
 from sklearn.linear_model import LinearRegression
 
@@ -137,3 +136,17 @@ class LadderMap:
     def _fit_linear_model(self):
         self.linear_model = LinearRegression()
         self.linear_model.fit(self.best_correlated_peaks.reshape(-1, 1), self.ladder)
+        
+    
+    def adjusted_step_dataframe(self, channel: str = "DATA1") -> pd.DataFrame:
+        df = (
+            pd.DataFrame({"peaks": self.data[channel]})
+            .reset_index()
+            .rename(columns={"index": "step_raw"})
+            .assign(
+                step_adjusted=lambda x: self.linear_model.predict(x.step_raw.to_numpy().reshape(-1, 1))
+            )
+            .loc[lambda x: x.step_adjusted >= 0]
+        )
+        
+        return df

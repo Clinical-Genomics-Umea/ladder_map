@@ -160,6 +160,12 @@ class LadderMap:
         )
 
         return df
+    
+    def plot_best_sample_ladder(self):
+        fig = plt.figure(figsize=(15, 10))
+        plt.plot(self.sample_ladder)
+        plt.plot(self.best_correlated_peaks, self.sample_ladder[self.best_correlated_peaks], "o")
+        return fig
 
 
 class PeakArea:

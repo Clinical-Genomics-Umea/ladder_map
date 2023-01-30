@@ -36,6 +36,13 @@ peak_area.calculate_peak_area(function="trapz")
 `Area(left_area=72643.5, right_area=100500.0, area_quotient=1.383468582873898)`
 ![peak_area](examples/peak_area.png)
 
+#### Visualization of best sample ladder peaks
+```python
+fig = laddermap.plot_best_sample_ladder()
+```
+#### Output
+![sample_ladder](examples/best_sample_ladder.png)
+
 #### Fitting model to the data
 ##### Voigt Distribution
 ```python

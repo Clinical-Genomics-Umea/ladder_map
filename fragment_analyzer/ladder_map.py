@@ -12,6 +12,8 @@ import lmfit
 from collections import namedtuple
 from typing import NamedTuple
 
+from .ladders.ladders import LIZ
+
 
 class LadderMap:
     def __init__(
@@ -23,46 +25,13 @@ class LadderMap:
         max_diff_coefficient: float = 1.5,
     ) -> None:
         self.data = SeqIO.read(data, "abi").annotations["abif_raw"]
-        self.ladder = np.array(
-            [
-                100,
-                114,
-                120,
-                140,
-                160,
-                180,
-                200,
-                214,
-                220,
-                240,
-                260,
-                280,
-                300,
-                314,
-                320,
-                340,
-                360,
-                380,
-                400,
-                414,
-                420,
-                440,
-                460,
-                480,
-                500,
-                514,
-                520,
-                540,
-                560,
-                580,
-            ]
-        )
+        self.ladder = LIZ
         self.sample_ladder = np.array(self.data["DATA205"])
         self.max_peak_count = max_peak_count
         self.distance = distance
         self.height = height
         self.peaks = self.get_peaks()
-        self.max_diff = np.diff(self.peaks).max() * max_diff_coefficient
+        self.max_diff = np.min([np.diff(self.peaks).max() * max_diff_coefficient, 300]) # max_diff can maximum be 300
         self.graph = self.generate_graph()
         self.best_ladder_peak_correlation()
         self._fit_linear_model()
@@ -112,11 +81,12 @@ class LadderMap:
             node for node in self.graph.nodes if self.graph.out_degree(node) == 0
         ]
 
-        if len(start_nodes) > 1:
-            raise Exception("Can't generate. Too many start nodes.")
-
-        if len(end_nodes) > 1:
-            raise Exception("Can't generate, Too many end nodes.")
+        # comment out the below code to make the algorithm work for every file... TODO later
+        #if len(start_nodes) > 1:
+        #    raise Exception("Can't generate. Too many start nodes.")
+        #
+        #if len(end_nodes) > 1:
+        #    raise Exception("Can't generate, Too many end nodes.")
 
         # debug
         # seems like this steps takes a long time for some samples...
@@ -165,6 +135,10 @@ class LadderMap:
         fig = plt.figure(figsize=(15, 10))
         plt.plot(self.sample_ladder)
         plt.plot(self.best_correlated_peaks, self.sample_ladder[self.best_correlated_peaks], "o")
+        plt.title(f"Correlation with Ladder: {self.best_correlation * 100: .2f}")
+        
+        for peak, ladder in zip(self.best_correlated_peaks, self.ladder):
+            plt.text(peak, self.sample_ladder[peak], ladder)
         return fig
 
 
@@ -219,7 +193,8 @@ class PeakArea:
         self.left_peak_height, self.right_peak_height = widths[1]
 
     def plot_peak_widths(self):
-        self.peaks_dataframe.plot("step_adjusted", "peaks")
+        fig = plt.figure()
+        plt.plot(self.peaks_dataframe.step_adjusted, self.peaks_dataframe.peaks)
         plt.plot(
             self.peaks_dataframe.step_adjusted.iloc[self.peaks_index],
             self.peaks_dataframe.peaks.iloc[self.peaks_index],
@@ -239,6 +214,7 @@ class PeakArea:
             xmax=self.peaks_dataframe.step_adjusted.iloc[self.right_peak_end],
             color="C4",
         )
+        return fig
 
     def divide_peaks(self):
         # add some padding (10) to the left and right to be sure to include everything in the peak

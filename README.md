@@ -4,6 +4,13 @@ Matches ladders to peaks by correlation for fragment analysis. The strategy rese
 
 One difference is that combinations of peaks are generated using [NetworkX](https://networkx.org/) to eliminate impossible combinations. This reduces complexity substantially and allows for an exhaustive search to identify the best match.
 
+## Install
+
+```bash
+git clone https://github.com/Clinical-Genomics-Umea/ladder_map.git
+cd fragment_analyzer
+pip install . 
+```
 
 ## Usage
 

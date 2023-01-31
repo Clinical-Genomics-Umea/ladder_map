@@ -2,6 +2,8 @@ import numpy as np
 
 LIZ = np.array(
     [
+        20,
+        40,
         60,
         80,
         100,

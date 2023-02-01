@@ -8,6 +8,7 @@ import lmfit
 from collections import namedtuple
 from typing import NamedTuple
 
+
 class PeakArea:
     def __init__(
         self, data: pd.DataFrame, start: int, end: int, rel_height: float = 0.95

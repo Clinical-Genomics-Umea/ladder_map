@@ -28,7 +28,9 @@ class LadderMap:
         self.distance = distance
         self.height = height
         self.peaks = self.get_peaks()
-        self.max_diff = np.min([np.diff(self.peaks).max() * max_diff_coefficient, 300]) # max_diff can maximum be 300
+        self.max_diff = np.min(
+            [np.diff(self.peaks).max() * max_diff_coefficient, 300]
+        )  # max_diff can maximum be 300
         self.graph = self.generate_graph()
         self.best_ladder_peak_correlation()
         self._fit_linear_model()
@@ -79,10 +81,10 @@ class LadderMap:
         ]
 
         # comment out the below code to make the algorithm work for every file... TODO later
-        #if len(start_nodes) > 1:
+        # if len(start_nodes) > 1:
         #    raise Exception("Can't generate. Too many start nodes.")
         #
-        #if len(end_nodes) > 1:
+        # if len(end_nodes) > 1:
         #    raise Exception("Can't generate, Too many end nodes.")
 
         # debug
@@ -127,13 +129,17 @@ class LadderMap:
         )
 
         return df
-    
+
     def plot_best_sample_ladder(self):
         fig = plt.figure(figsize=(15, 10))
         plt.plot(self.sample_ladder)
-        plt.plot(self.best_correlated_peaks, self.sample_ladder[self.best_correlated_peaks], "o")
+        plt.plot(
+            self.best_correlated_peaks,
+            self.sample_ladder[self.best_correlated_peaks],
+            "o",
+        )
         plt.title(f"Correlation with Ladder: {self.best_correlation * 100: .2f}")
-        
+
         for peak, ladder in zip(self.best_correlated_peaks, self.ladder):
             plt.text(peak, self.sample_ladder[peak], ladder)
         return fig

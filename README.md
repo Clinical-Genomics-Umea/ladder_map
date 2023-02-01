@@ -4,6 +4,13 @@ Matches ladders to peaks by correlation for fragment analysis. The strategy rese
 
 One difference is that combinations of peaks are generated using [NetworkX](https://networkx.org/) to eliminate impossible combinations. This reduces complexity substantially and allows for an exhaustive search to identify the best match.
 
+## Install
+
+```bash
+git clone https://github.com/Clinical-Genomics-Umea/ladder_map.git
+cd fragment_analyzer
+pip install . 
+```
 
 ## Usage
 
@@ -13,6 +20,8 @@ The library exists of two main classes, namely `LadderMap` and `PeakArea`.
 `PeakArea` calculates peak area.
 
 ### Example Usage
+
+#### Area under curve using naive integrals
 ```python
 from fragment_analyzer.ladder_map import LadderMap, PeakArea
 
@@ -30,9 +39,31 @@ peak_area = PeakArea(
 peak_area.plot_peak_widths()
 peak_area.calculate_peak_area(function="trapz")
 ```
-### Output
+#### Output
 `Area(left_area=72643.5, right_area=100500.0, area_quotient=1.383468582873898)`
 ![peak_area](examples/peak_area.png)
+
+#### Visualization of best sample ladder peaks
+```python
+fig = laddermap.plot_best_sample_ladder()
+```
+#### Output
+![sample_ladder](examples/best_sample_ladder.png)
+
+#### Fitting model to the data
+##### Voigt Distribution
+```python
+peak_area.plot_lmfit_model("voigt")
+```
+#### Output
+![voigt_model](examples/voigt_model.png)
+
+##### Gauss Distribution
+```python
+peak_area.plot_lmfit_model("gauss")
+```
+#### Output
+![gauss_model](examples/gauss_model.png)
 
 
 

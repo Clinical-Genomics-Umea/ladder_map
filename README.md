@@ -66,4 +66,22 @@ peak_area.plot_lmfit_model("gauss")
 ![gauss_model](examples/gauss_model.png)
 
 
+#### Looking at more than two peaks
+```python
+peak_area = PeakArea(
+    laddermap.adjusted_step_dataframe(channel="DATA1"),
+    start=250, 
+    end=300,
+    num_peaks=4,
+    padding=2,
+    model="voigt"
+)
+
+
+peak_area.plot_lmfit_model()
+```
+#### Output
+![four_peaks](examples/four_peaks.png)
+
+
 

@@ -100,5 +100,26 @@ Normalized peaks:
 #### Output
 ![normalized](examples/normalized.png)
 
+#### Generate report:
+```python
+from fragment_analyzer import LadderMap, PeakArea, generate_report
+
+data = "demo/4062_Dx/3_PRT_2_4062_C02_Dx.fsa"
+laddermap = LadderMap(data, normalize_peaks=False)
+peak_area = PeakArea(
+    laddermap.adjusted_step_dataframe(channel="DATA1"),
+    start=200, 
+    end=250,
+    num_peaks=2,
+    padding=2,
+    model="gauss"
+)
+
+generate_report(laddermap, peak_area, name="my_folder/my-report")
+```
+The report is saves in `my_folder` as `my-report.html`.
+An example report can be found in `examples`
+
+
 
 

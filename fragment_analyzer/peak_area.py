@@ -75,7 +75,7 @@ class PeakArea:
 
     
     def plot_peak_widths(self):
-        fig = plt.figure()
+        fig = plt.figure(figsize=(15,10))
         
         plt.plot(self.peaks_dataframe.step_adjusted, self.peaks_dataframe.peaks)
         
@@ -92,7 +92,8 @@ class PeakArea:
                 xmax=self.peaks_dataframe.step_adjusted.iloc[widths.peak_end],
                 color="C3",
             )
-
+        plt.ylabel("intensity")
+        plt.xlabel("basepairs")
         return fig
 
     def divide_peaks(self, padding):
@@ -144,7 +145,10 @@ class PeakArea:
 
     def plot_lmfit_model(self):
 
-        fig, axs = plt.subplots(1, len(self.fit_df), sharey=True)
+        fig, axs = plt.subplots(1, len(self.fit_df), sharey=True, figsize=(15,10))
+        plt.ylabel("intensity")
+        plt.xlabel("basepairs")
+        fig.legend(["Raw data", "Model"], bbox_to_anchor=(1.1, 0.9))
         
         for i, ax in enumerate(axs):
             ax.plot(self.fit_df[i].step_adjusted, self.fit_df[i].peaks, "o")
@@ -155,6 +159,5 @@ class PeakArea:
             f"Quotient: {self.quotient: .2f}"
         )
             
-        fig.legend(["Raw data", "Model"], bbox_to_anchor=(1.1, 0.9))
         return fig
     

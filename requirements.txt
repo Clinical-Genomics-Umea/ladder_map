@@ -6,3 +6,4 @@ biopython
 scipy
 scikit-learn
 lmfit
+panel

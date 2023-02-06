@@ -8,6 +8,7 @@ from sklearn.linear_model import LinearRegression
 from scipy.signal import find_peaks
 from collections import namedtuple
 from typing import NamedTuple
+from pathlib import Path
 
 from .ladders.ladders import LIZ
 from .baseline_removal import baseline_arPLS
@@ -16,14 +17,15 @@ from .baseline_removal import baseline_arPLS
 class LadderMap:
     def __init__(
         self,
-        data: str,
+        data_: str,
         normalize_peaks: bool = False,
         max_peak_count: int = 38,
         distance: int = 30,
         height: int = 100,
         max_diff_coefficient: float = 1.5,
     ) -> None:
-        self.data = SeqIO.read(data, "abi").annotations["abif_raw"]
+        self.data_ = Path(data_)
+        self.data = SeqIO.read(data_, "abi").annotations["abif_raw"]
         self.ladder = LIZ
         self.normalize_peaks = normalize_peaks
         
@@ -156,4 +158,7 @@ class LadderMap:
 
         for peak, ladder in zip(self.best_correlated_peaks, self.ladder):
             plt.text(peak, self.sample_ladder[peak], ladder)
+        
+        plt.ylabel("intensity")
+        plt.xlabel("time")
         return fig

@@ -8,7 +8,6 @@ from collections import namedtuple
 from typing import NamedTuple
 
 # TODO:
-# Add baseline normalization
 # Add method to output nice report (or different class)
 class PeakArea:
     def __init__(

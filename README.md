@@ -84,5 +84,21 @@ The last peak is divided by the mean of the peaks to the left of it:
 #### Output
 ![four_peaks](examples/four_peaks.png)
 
+#### If data needs baseline correction and normalization:
+```python
+laddermap = LadderMap(data, normalize_peaks=False)
+```
+Messy output
+#### Output
+![messy](examples/needs_normalization.png)
+
+#### Normalized data:
+```python
+laddermap = LadderMap(data, normalize_peaks=True)
+```
+Normalized peaks:
+#### Output
+![normalized](examples/normalized.png)
+
 
 

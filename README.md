@@ -80,6 +80,7 @@ peak_area = PeakArea(
 
 peak_area.plot_lmfit_model()
 ```
+The last peak is divided by the mean of the peaks to the left of it:
 #### Output
 ![four_peaks](examples/four_peaks.png)
 

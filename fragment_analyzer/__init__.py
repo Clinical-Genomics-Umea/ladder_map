@@ -12,10 +12,4 @@ from fragment_analyzer.baseline_removal import baseline_arPLS
 import fragment_analyzer.ladders.ladders as ladders
 from fragment_analyzer.reports.generate_report import generate_report
 
-__all__ = [
-    "LadderMap",
-    "PeakArea",
-    "baseline_arPLS",
-    "ladders",
-    "generate_report"
-]
+__all__ = ["LadderMap", "PeakArea", "baseline_arPLS", "ladders", "generate_report"]

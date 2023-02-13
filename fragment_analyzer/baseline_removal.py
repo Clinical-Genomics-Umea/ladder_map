@@ -16,7 +16,7 @@ def baseline_arPLS(y, ratio=0.99, lam=100, niter=1000, full_output=False):
     L = len(y)
 
     diag = np.ones(L - 2)
-    D = sparse.spdiags([diag, -2*diag, diag], [0, -1, -2], L, L - 2)
+    D = sparse.spdiags([diag, -2 * diag, diag], [0, -1, -2], L, L - 2)
 
     H = lam * D.dot(D.T)  # The transposes are flipped w.r.t the Algorithm on pg. 252
 
@@ -34,7 +34,7 @@ def baseline_arPLS(y, ratio=0.99, lam=100, niter=1000, full_output=False):
         m = np.mean(dn)
         s = np.std(dn)
 
-        w_new = 1 / (1 + np.exp(2 * (d - (2*s - m))/s))
+        w_new = 1 / (1 + np.exp(2 * (d - (2 * s - m)) / s))
 
         crit = norm(w_new - w) / norm(w)
 
@@ -44,11 +44,11 @@ def baseline_arPLS(y, ratio=0.99, lam=100, niter=1000, full_output=False):
         count += 1
 
         if count > niter:
-            print('Maximum number of iterations exceeded')
+            print("Maximum number of iterations exceeded")
             break
 
     if full_output:
-        info = {'num_iter': count, 'stop_criterion': crit}
+        info = {"num_iter": count, "stop_criterion": crit}
         return z, d, info
     else:
         return z

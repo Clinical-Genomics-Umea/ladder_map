@@ -10,7 +10,7 @@ from collections import namedtuple
 from typing import NamedTuple
 from pathlib import Path
 
-from .ladders.ladders import LIZ
+from .ladders.ladders import LADDERS
 from .baseline_removal import baseline_arPLS
 
 
@@ -23,17 +23,18 @@ class LadderMap:
         distance: int = 30,
         height: int = 100,
         max_diff_coefficient: float = 1.5,
+        ladder: str = "LIZ",
     ) -> None:
         self.data_ = Path(data_)
         self.data = SeqIO.read(data_, "abi").annotations["abif_raw"]
-        self.ladder = LIZ
+        self.ladder = LADDERS[ladder]
         self.normalize_peaks = normalize_peaks
-        
+
         if self.normalize_peaks:
             self.sample_ladder = np.array(baseline_arPLS(self.data["DATA205"]))
         else:
             self.sample_ladder = np.array(self.data["DATA205"])
-            
+
         self.max_peak_count = max_peak_count
         self.distance = distance
         self.height = height
@@ -46,7 +47,7 @@ class LadderMap:
         self._fit_linear_model()
 
     def get_peaks(self) -> np.array:
-        
+
         peaks_obj = signal.find_peaks(
             self.sample_ladder, distance=self.distance, height=self.height
         )
@@ -122,6 +123,8 @@ class LadderMap:
         self.best_correlated_peaks = best.peaks.squeeze()
         self.best_correlation = best.corr_peaks.squeeze()
 
+        self.correlation_dataframe = best.explode("peaks").assign(ladder=self.ladder)
+
     def _fit_linear_model(self):
         self.linear_model = LinearRegression()
         self.linear_model.fit(self.best_correlated_peaks.reshape(-1, 1), self.ladder)
@@ -131,7 +134,7 @@ class LadderMap:
             data = baseline_arPLS(self.data[channel])
         else:
             data = self.data[channel]
-            
+
         df = (
             pd.DataFrame({"peaks": data})
             .reset_index()
@@ -158,7 +161,20 @@ class LadderMap:
 
         for peak, ladder in zip(self.best_correlated_peaks, self.ladder):
             plt.text(peak, self.sample_ladder[peak], ladder)
-        
+
         plt.ylabel("intensity")
         plt.xlabel("time")
+        plt.grid()
+        return fig
+
+    def plot_ladder_correlation(self):
+        fig = plt.figure(figsize=(15, 10))
+        plt.plot(
+            self.correlation_dataframe.ladder, self.correlation_dataframe.peaks, "o"
+        )
+        plt.xlabel("Basepairs")
+        plt.ylabel("Time")
+        plt.grid()
+        plt.title("Correlation of found peaks with size-standard")
+
         return fig

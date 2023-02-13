@@ -37,10 +37,8 @@ peak_area = PeakArea(
 )
 
 peak_area.plot_peak_widths()
-peak_area.calculate_peak_area(function="trapz")
 ```
 #### Output
-`Area(left_area=72643.5, right_area=100500.0, area_quotient=1.383468582873898)`
 ![peak_area](examples/peak_area.png)
 
 #### Visualization of best sample ladder peaks

@@ -14,6 +14,7 @@ class Report:
     def __init__(self, laddermap: LadderMap, peakarea: PeakArea):
         self.laddermap = laddermap
         self.peakarea = peakarea
+        self.name = self.laddermap.data_.parts[-1]
         
     def header(
         self,
@@ -45,7 +46,7 @@ class Report:
         head = self.header(
             text=f"""
             # Fragment Analysis Report
-            ## Report of {self.laddermap.data_.parts[-1]}
+            ## Report of {self.name}
             """,
             fontsize="20px",
             bg_color="#03a1fc",
@@ -56,6 +57,10 @@ class Report:
         best_ladder_markdown = self.header("# Fit of the Ladder", height=100)
         best_ladder_plot = pn.pane.Matplotlib(self.laddermap.plot_best_sample_ladder(), align="center")
     
+        correlation_plot = pn.pane.Matplotlib(
+            self.laddermap.plot_ladder_correlation(),
+        )
+        
         ### ----- Peaks info ----- ###
         peaks_markdown = self.header("# Peaks", height=100)
         peaks_plot = pn.pane.Matplotlib(
@@ -63,13 +68,19 @@ class Report:
             align="center"
         )
         
+        
         ### ----- Quotient info ----- ###
         quotient_markdown = self.header("# Areas", height=100)
         quotient_plot = pn.pane.Matplotlib(self.peakarea.plot_lmfit_model())
         
         ### ----- Model fitting info ----- ###
         model_fitting_markdown = self.header("# Fitting of the Models", height=100)
-        model_fitting_report = [x for x in self.peakarea.fit_report]
+        model_fitting_report = []
+        for i, x in enumerate(self.peakarea.fit_report):
+            markdown = pn.pane.Markdown(f"## Peak number {i + 1}:")
+            model_fitting_report.append(markdown)
+            model_fitting_report.append(x)
+            model_fitting_report.append(pn.layout.Divider())
     
     
         ### CREATE REPORT ###
@@ -78,6 +89,7 @@ class Report:
             head, 
             best_ladder_markdown,
             best_ladder_plot,
+            correlation_plot,
             pn.layout.Divider(),
             peaks_markdown,
             peaks_plot,
@@ -90,7 +102,13 @@ class Report:
         )
     
 
-def generate_report(laddermap: LadderMap, peakarea: PeakArea, name: str):
+def generate_report(laddermap: LadderMap, peakarea: PeakArea, folder: str):
     report = Report(laddermap, peakarea)
-    report.generate_report().save(name, title=name)
+    
+    outpath = Path(folder)
+    if not outpath.exists():
+        outpath.mkdir(parents=True)
+        
+    outname = outpath / f"fragment_analysis-report-{report.name}.html"
+    report.generate_report().save(outname, title=report.name)
     

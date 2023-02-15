@@ -68,7 +68,6 @@ class Report:
             align="center"
         )
         
-        
         ### ----- Quotient info ----- ###
         quotient_markdown = self.header("# Areas", height=100)
         quotient_plot = pn.pane.Matplotlib(self.peakarea.plot_lmfit_model())
@@ -102,13 +101,36 @@ class Report:
         )
     
 
-def generate_report(laddermap: LadderMap, peakarea: PeakArea, folder: str):
-    report = Report(laddermap, peakarea)
+def generate_report(laddermap: LadderMap, peakarea: PeakArea, folder: str) -> None:
+    """
+    Generates an HTML report for a given ladder map and peak area, and saves it to the specified folder.
+
+    Args:
+        laddermap: A LadderMap object containing the ladder map data.
+        peakarea: A PeakArea object containing the peak area data.
+        folder: A string representing the folder where the report will be saved.
+
+    Returns:
+        None
+        
+    Example usage:
+    # create a LadderMap and PeakArea object
+    laddermap = LadderMap(...)
+    peakarea = PeakArea(...)
+
+    # generate a report and save it to a folder called 'reports'
+    generate_report(laddermap, peakarea, 'reports')
+    """
     
+    report = Report(laddermap, peakarea)
+
+    # create the output folder if it doesn't exist
     outpath = Path(folder)
     if not outpath.exists():
         outpath.mkdir(parents=True)
-        
+
+    # generate the report and save it to the specified folder
     outname = outpath / f"fragment_analysis-report-{report.name}.html"
     report.generate_report().save(outname, title=report.name)
+       
     

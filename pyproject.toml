@@ -1,0 +1,40 @@
+[build-system]
+requires = [
+    "setuptools",
+    "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Peak-A-Py"
+version = "0.1.0"
+dependencies = [
+    "pandas",
+    "numpy",
+    "scikit-learn",
+    "matplotlib",
+    "networkx",
+    "lmfit",
+    "scipy",
+    "biopython",
+]
+authors = [
+    {name = "William Rosenbaum", email = "william.rosenbaum@umu.se"},
+    {name = "Pär Larsson", email = "par.larsson@umu.se"},
+]
+description = "Fragment Analysis package in python!"
+readme = "README.md"
+requires-python = ">=3.7"
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["Fragment analysis", "Fragman", "Peak finding", "electrophoresis", "FSA files"]
+
+[project.optional-dependencies]
+dev = ["black", "pylint"]
+
+[project.urls]
+Homepage = "https://github.com/Clinical-Genomics-Umea/ladder_map"

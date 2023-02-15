@@ -5,3 +5,7 @@ format:
 	black *.py fragment_analyzer/*.py fragment_analyzer/ladders/*
 lint:
 	pylint --disable=R,C *.py fragment_analyzer/*.py
+clean:
+	rm -rf dist/ build/ *.egg-info
+build:
+    python -m build

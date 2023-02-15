@@ -7,3 +7,5 @@ scipy
 scikit-learn
 lmfit
 panel
+build
+twine

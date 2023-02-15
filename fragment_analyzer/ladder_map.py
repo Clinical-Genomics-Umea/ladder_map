@@ -178,3 +178,5 @@ class LadderMap:
         plt.title("Correlation of found peaks with size-standard")
 
         return fig
+
+    

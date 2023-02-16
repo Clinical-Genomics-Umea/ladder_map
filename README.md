@@ -1,4 +1,5 @@
 ## ladder map
+![logo](examples/logo.png)
 
 Matches ladders to peaks by correlation for fragment analysis. The strategy resembles the one used by [Fragman](https://cran.r-project.org/web/packages/Fragman/index.html) for R.
 
@@ -7,9 +8,9 @@ One difference is that combinations of peaks are generated using [NetworkX](http
 ## Install
 
 ```bash
-git clone https://github.com/Clinical-Genomics-Umea/ladder_map.git
-cd fragment_analyzer
-pip install . 
+pip install peak-a-py
+
+conda install -c bioconda peak-a-py
 ```
 
 ## Usage
@@ -117,6 +118,10 @@ generate_report(laddermap, peak_area, name="my_folder/my-report")
 ```
 The report is saves in `my_folder` as `my-report.html`.
 An example report can be found in `examples`
+
+# TODO
+* output excel or csv with peak area, position of peak and height
+* make agnostic algorithm of how many peaks one expects
 
 
 

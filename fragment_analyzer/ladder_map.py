@@ -5,13 +5,11 @@ import networkx as nx
 from scipy import stats, signal
 from Bio import SeqIO
 from sklearn.linear_model import LinearRegression
-from scipy.signal import find_peaks
-from collections import namedtuple
-from typing import NamedTuple
 from pathlib import Path
 
-from .ladders.ladders import LADDERS
+from .ladders.ladders import LADDERS, CHANNELS
 from .baseline_removal import baseline_arPLS
+
 
 
 class LadderMap:
@@ -25,15 +23,16 @@ class LadderMap:
         max_diff_coefficient: float = 1.5,
         ladder: str = "LIZ",
     ) -> None:
+        self.channel = CHANNELS[ladder]
         self.data_ = Path(data_)
         self.data = SeqIO.read(data_, "abi").annotations["abif_raw"]
         self.ladder = LADDERS[ladder]
         self.normalize_peaks = normalize_peaks
 
         if self.normalize_peaks:
-            self.sample_ladder = np.array(baseline_arPLS(self.data["DATA205"]))
+            self.sample_ladder = np.array(baseline_arPLS(self.data[self.channel]))
         else:
-            self.sample_ladder = np.array(self.data["DATA205"])
+            self.sample_ladder = np.array(self.data[self.channel])
 
         self.max_peak_count = max_peak_count
         self.distance = distance
@@ -149,8 +148,9 @@ class LadderMap:
 
         return df
 
+    @property
     def plot_best_sample_ladder(self):
-        fig = plt.figure(figsize=(15, 10))
+        fig = plt.figure(figsize=(20, 10))
         plt.plot(self.sample_ladder)
         plt.plot(
             self.best_correlated_peaks,
@@ -167,8 +167,9 @@ class LadderMap:
         plt.grid()
         return fig
 
+    @property
     def plot_ladder_correlation(self):
-        fig = plt.figure(figsize=(15, 10))
+        fig = plt.figure(figsize=(20, 10))
         plt.plot(
             self.correlation_dataframe.ladder, self.correlation_dataframe.peaks, "o"
         )
@@ -178,5 +179,3 @@ class LadderMap:
         plt.title("Correlation of found peaks with size-standard")
 
         return fig
-
-    

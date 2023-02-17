@@ -11,17 +11,16 @@ from .ladders.ladders import LADDERS, CHANNELS
 from .baseline_removal import baseline_arPLS
 
 
-
 class LadderMap:
     def __init__(
         self,
         data_: str,
+        ladder: str,
         normalize_peaks: bool = False,
         max_peak_count: int = 38,
         distance: int = 30,
         height: int = 100,
         max_diff_coefficient: float = 1.5,
-        ladder: str = "LIZ",
     ) -> None:
         self.channel = CHANNELS[ladder]
         self.data_ = Path(data_)

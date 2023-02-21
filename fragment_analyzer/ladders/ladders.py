@@ -1,11 +1,8 @@
 import numpy as np
 
 LADDERS = {
-    "LIZ": np.array(
-        [
-            20,
-            40,
-            60,
+    "LIZ": {
+        "sizes": np.array([
             80,
             100,
             114,
@@ -37,10 +34,14 @@ LADDERS = {
             540,
             560,
             580,
-        ]
-    ),
-    "ROX": np.array(
-        [
+            600
+        ]),
+        "distance": 30, 
+        "height": 100, 
+        "max_ladder_trace_distance": 300
+    },
+    "ROX": {
+        "sizes": np.array([
             79,
             90,
             105,
@@ -62,8 +63,12 @@ LADDERS = {
             799,
             902,
             1007,
-        ]
-    ),
+        ]),
+        "distance": 30, 
+        "height": 100, 
+        "max_ladder_trace_distance": 300
+    }
 }
+
 
 CHANNELS = {"LIZ": "DATA205", "ROX": "DATA12"}

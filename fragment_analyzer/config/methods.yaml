@@ -1,0 +1,18 @@
+---
+# method:
+#   channel_name
+#       data_channel: id
+#       dye: dye_name
+#       ladder: true/false
+
+prt:
+    data1:
+        data_channel: DATA1
+        dye: FAM
+        ladder: false
+    ladder:
+        data_channel: DATA205
+        dye: LIZ
+        ladder: true
+        ladder_name: LIZ-600
+

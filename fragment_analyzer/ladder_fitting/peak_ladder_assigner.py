@@ -5,17 +5,27 @@ from scipy import signal
 from sklearn.metrics import r2_score
 from sklearn.preprocessing import minmax_scale
 from scipy.interpolate import UnivariateSpline
-
-from fragment_analyzer.utils.fsa_file import FsaFile
+from fragment_analyzer.ladders.ladders import LADDERS
 
 
 class PeakLadderAssigner:
-    def __init__(self, fsa_file=FsaFile) -> None:
+    def __init__(self, ladder_name) -> None:
 
-        self.fsa_file = fsa_file
+        if ladder_name not in LADDERS:
+            raise Exception(f"Invalid ladder name: {ladder_name}")
+
+        self.ladder_name = ladder_name
+        self.ladder_sizes_definition = LADDERS[ladder_name]["sizes"]
+        self.ladder_sizes_definition_count = self.ladder_sizes_definition.size
+        self.ladder_channel = LADDERS[ladder_name]["channel"]
+        self.ladder_trace_min_interpeak_distance = LADDERS[ladder_name]["distance"]
+        self.ladder_trace_max_interpeak_distance = LADDERS[ladder_name]["max_ladder_trace_distance"]
+        self.ladder_trace_min_peak_height = LADDERS[ladder_name]["height"]
+        self.ladder_trace_max_peak_count = self.ladder_sizes_definition + LADDERS[ladder_name]["peak_count_padding"]
+        self.ladder_channel = LADDERS[ladder_name]["channel"]
 
     def assign_ladder_peak_sizes(self):
-        peaks = self.get_peaks(self.fsa_file.size_standard)
+        peaks = self.get_peaks(self.fsa_obj.size_standard)
         graph = self.generate_graph(peaks)
         combinations = self.generate_combinations(graph)
         best_combination = self.get_best_fit(combinations)
@@ -26,8 +36,8 @@ class PeakLadderAssigner:
 
         peaks_obj = signal.find_peaks(
             size_standard,
-            distance=self.fsa_file.min_interpeak_distance,
-            height=self.fsa_file.min_height,
+            distance=self.fsa_obj.min_interpeak_distance,
+            height=self.fsa_obj.min_height,
         )
 
         peaks = peaks_obj[0]
@@ -38,7 +48,7 @@ class PeakLadderAssigner:
         idxmax = df["heights"].idxmax()
         df = df.drop(idxmax)
 
-        peaks_adj = df.nlargest(self.fsa_file.max_peak_count, ["heights"])
+        peaks_adj = df.nlargest(self.fsa_obj.max_peak_count, ["heights"])
 
         return peaks_adj["peaks"].sort_values().to_numpy()
 
@@ -53,7 +63,7 @@ class PeakLadderAssigner:
             j = i + 1
             while j < peaks.size:
                 diff = peaks[j] - peaks[i]
-                if diff <= self.fsa_file.max_ladder_trace_distance:
+                if diff <= self.fsa_obj.max_ladder_trace_distance:
                     G.add_edge(peaks[i], peaks[j], length=diff)
                 j += 1
             i += 1
@@ -67,8 +77,8 @@ class PeakLadderAssigner:
         all_paths = list(nx.all_simple_paths(graph, start_nodes[0], end_nodes[0]))
 
         for p_arr in all_paths:
-            for i in range(0, len(p_arr) - self.fsa_file.ref_count + 1):
-                yield np.array(p_arr[i : i + self.fsa_file.ref_count])
+            for i in range(0, len(p_arr) - self.fsa_obj.ref_count + 1):
+                yield np.array(p_arr[i : i + self.fsa_obj.ref_count])
 
     def get_best_fit(self, combinations, method="2nd_derivative"):
         df = pd.DataFrame()
@@ -107,10 +117,10 @@ class PeakLadderAssigner:
 
         comb_scaled = minmax_scale(
             combination,
-            feature_range=(self.fsa_file.ref_sizes[0], self.fsa_file.ref_sizes[-1]),
+            feature_range=(self.fsa_obj.ref_sizes[0], self.fsa_obj.ref_sizes[-1]),
         )
 
-        diff_intervals = np.diff(comb_scaled) - np.diff(self.fsa_file.ref_sizes)
+        diff_intervals = np.diff(comb_scaled) - np.diff(self.fsa_obj.ref_sizes)
         abs_diff_intervals_gradient = np.abs(np.gradient(diff_intervals))
         max_abs_diff_intervals_gradient_idx = np.argmax(abs_diff_intervals_gradient)
 
@@ -120,16 +130,16 @@ class PeakLadderAssigner:
 
         comb_scaled = minmax_scale(
             combination,
-            feature_range=(self.fsa_file.ref_sizes[0], self.fsa_file.ref_sizes[-1]),
+            feature_range=(self.fsa_obj.ref_sizes[0], self.fsa_obj.ref_sizes[-1]),
         )
 
-        diff_intervals = np.diff(comb_scaled) - np.diff(self.fsa_file.ref_sizes)
+        diff_intervals = np.diff(comb_scaled) - np.diff(self.fsa_obj.ref_sizes)
         abs_second_derivative = np.abs(np.gradient(np.gradient(diff_intervals)))
         max_second_derivative_idx = np.argmax(abs_second_derivative)
 
         return abs_second_derivative[max_second_derivative_idx]
 
     def _max_spline_second_derivative_score(self, combination: np.ndarray):
-        spl = UnivariateSpline(self.fsa_file.ref_sizes, combination, s=0)
+        spl = UnivariateSpline(self.fsa_obj.ref_sizes, combination, s=0)
         der2 = spl.derivative(n=2)
-        return max(abs(der2(self.fsa_file.ref_sizes)))
+        return max(abs(der2(self.fsa_obj.ref_sizes)))

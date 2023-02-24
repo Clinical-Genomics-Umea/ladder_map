@@ -1,7 +1,7 @@
 import numpy as np
 
 LADDERS = {
-    "LIZ": {
+    "LIZ-600": {
         "sizes": np.array(
             [
                 20,
@@ -45,6 +45,7 @@ LADDERS = {
         "height": 100,
         "max_ladder_trace_distance": 300,
         "channel": "DATA205",
+        "peak_count_padding": 3
     },
     "ROX": {
         "sizes": np.array(
@@ -76,5 +77,6 @@ LADDERS = {
         "height": 100,
         "max_ladder_trace_distance": 600,
         "channel": "DATA12",
+        "peak_count_padding": 3
     },
 }

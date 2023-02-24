@@ -11,7 +11,7 @@ class PlotLadder:
 
     @property
     def plot_ladder_peaks(self) -> matplotlib.figure.Figure:
-        trace = self.model.fsa_file.size_standard
+        trace = self.model.fsa_file.ladder_sizes_definition
         best_combination = self.model.best_combination
         ladder_name = self.model.fsa_file.ladder
         ladder_size = self.model.fsa_file.ref_sizes

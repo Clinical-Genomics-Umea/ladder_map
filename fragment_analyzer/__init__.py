@@ -10,7 +10,7 @@ from fragment_analyzer.ladder_fitting.peak_ladder_assigner import PeakLadderAssi
 from fragment_analyzer.ladders.ladders import LADDERS
 from fragment_analyzer.plotting.plot_ladder import PlotLadder
 from fragment_analyzer.utils.baseline_removal import baseline_arPLS
-from fragment_analyzer.utils.fsa_file import FsaFile
+from fragment_analyzer.fsa.fsa import FsaObj
 from fragment_analyzer.applications.peak_area import PeakArea
 from fragment_analyzer.plotting.plot_peak_area import PlotPeakArea
 
@@ -20,7 +20,7 @@ __all__ = [
     "LADDERS",
     "PlotLadder",
     "baseline_arPLS",
-    "FsaFile",
+    "FsaObj",
     "PeakArea",
     "PlotPeakArea",
 ]

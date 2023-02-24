@@ -38,13 +38,15 @@ class FsaObj:
                 )
 
     def __repr__(self):
-        representer = f"""
-            FsaFile-object with following parameters:
+        ladder_c = self.method_def[self.ladder_channel_name]
+        all_channels = [c for c in self.traces]
+        r = f"""
+            Fsa-object with following parameters:
             
             File: {self.file}
             Filename: {self.file_name}
-            Ladder data channel: {self.method_def[self.ladder_channel_name]}
-            Active trace channels: {[c for c in self.traces]} 
+            Ladder data channel: {ladder_c}
+            All trace channels: {all_channels} 
             """
-        return representer
+        return r
 

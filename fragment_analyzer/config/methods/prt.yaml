@@ -1,0 +1,50 @@
+---
+name: prt
+channels:
+  - channel_name: data
+    channel: DATA12
+    dye: FAM
+    ladder: false
+    desc: data1
+    alleles:
+      - allele_name: prt1_1
+        start: 1
+        end: 2
+      - allele_name: prt1_2
+        start: 3
+        end: 4
+      - allele_name: prt2_1
+        start: 5
+        end: 6
+      - allele_name: prt2_2
+        start: 7
+        end: 8
+      - allele_name: prt3_1
+        start: 9
+        end: 10
+      - allele_name: prt3_2
+        start: 11
+        end: 12
+      - allele_name: prt3_3
+        start: 13
+        end: 14
+      - allele_name: prt3_4
+        start: 15
+        end: 16
+      - allele_name: prt3_5
+        start: 17
+        end: 18
+      - allele_name: prt4_1
+        start: 19
+        end: 22
+      - allele_name: prt4_2
+        start: 21
+        end: 22
+
+  - channel_name: ladder
+    channel: DATA205
+    dye: LIZ
+    ladder: true
+    desc: LIZ-600
+    alleles: []
+

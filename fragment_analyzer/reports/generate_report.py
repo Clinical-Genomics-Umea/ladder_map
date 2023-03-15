@@ -12,7 +12,7 @@ class Report:
     def __init__(self, laddermap: LadderMap, peakarea: PeakArea):
         self.laddermap = laddermap
         self.peakarea = peakarea
-        self.name = self.peakarea.file_name
+        self.name = self.peakarea.filename
 
     def header(
         self,

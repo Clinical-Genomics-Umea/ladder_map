@@ -15,7 +15,7 @@ class PeakArea:
     ) -> None:
         self.model = model
         self.raw_data = self.model.adjusted_baisepair_df
-        self.file_name = self.model.fsa_file.file_name
+        self.file_name = self.model.fsa_file.filename
         self.search_peaks_start = search_peaks_start
 
         # find peaks

@@ -1,0 +1,30 @@
+---
+allowed_channels:
+  - "DATA1"
+  - "DATA2"
+  - "DATA3"
+  - "DATA4"
+  - "DATA5"
+  - "DATA6"
+  - "DATA7"
+  - "DATA8"
+  - "DATA9"
+  - "DATA10"
+  - "DATA11"
+  - "DATA12"
+  - "DATA105"
+  - "DATA205"
+
+allowed_dyes:
+  - "LIZ"
+  - "FAM"
+
+method_name_regex: ^\S{3,10}$
+allele_name_regex: ^\S{3,10}$
+channel_name_regex: ^\S{3,10}$
+desc_regex: ^\S{0,10}$
+
+ladder_channel_count: 1
+
+channels_unique_fields: [channel_name, channel, dye]
+alleles_unique_fields: [allele_name, start, end]

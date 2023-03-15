@@ -9,11 +9,11 @@ from sklearn.metrics import mean_squared_error, r2_score
 import pandas as pd
 
 from fragment_analyzer.ladder_fitting.peak_ladder_assigner import PeakLadderAssigner
-from fragment_analyzer.fsa.fsa import FsaObj
+from fragment_analyzer.fsa.fsa import Fsa
 
 
 class FitLadderModel:
-    def __init__(self, fsa_file: FsaObj, ladder_assigner: PeakLadderAssigner):
+    def __init__(self, fsa_file: Fsa, ladder_assigner: PeakLadderAssigner):
         self.fsa_file = fsa_file
         self.ladder_assigner = ladder_assigner
         self.best_combination = ladder_assigner.assign_ladder_peak_sizes().reshape(

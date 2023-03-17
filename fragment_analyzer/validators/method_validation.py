@@ -143,6 +143,6 @@ class Method(BaseModel):
     #     return values
 
 def validate_method(method: dict):
-    model = Method(**method)
-    # print(model)
+    return Method(**method)
+
 

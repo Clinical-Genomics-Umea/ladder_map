@@ -8,12 +8,12 @@ from fragment_analyzer.validators.method_validation import validate_method
 from pathlib import Path
 
 
-def main():
-    methods_path = Path("fragment_analyzer/config/methods")
-    method_objects = methods_path.glob("*.yaml")
-    method_dict = {}
-    for m in method_objects:
-        method_dict[m.name.split('.')[0]] = m
+def get_arguments(methods: list):
+    # methods_path = Path("fragment_analyzer/config/methods")
+    # method_objects = methods_path.glob("*.yaml")
+    # method_dict = {}
+    # for m in method_objects:
+    #     method_dict[m.name.split('.')[0]] = m
 
     parser = argparse.ArgumentParser(
         prog='fraggler',
@@ -28,21 +28,52 @@ def main():
                               '--method',
                               type=str,
                               help='Input fragment analysis file (fsa)',
-                              choices=method_dict.keys())
+                              choices=methods)
 
     method_group.add_argument('-mp', '--method-path', type=str, help='Path to method yaml file')
 
     parser.add_argument('-l', '--log-file-path',  type=str, help='Save log to logfile')
 
-    args = parser.parse_args()
+    return parser.parse_args()
 
-    method_path = args.method_path if args.method_path else method_dict[args.method]
+def main():
+
+    #
+    # parser = argparse.ArgumentParser(
+    #     prog='fraggler',
+    #     description='Automatic fragment analyzer')
+    #
+    # input_group = parser.add_mutually_exclusive_group(required=True)
+    # input_group.add_argument('-i', '--infile', type=str, help='Input fragment analysis file (fsa)')
+    # input_group.add_argument('-d', '--indir', type=str, help='Dir containing fragment analysis files (fsa)')
+    #
+    # method_group = parser.add_mutually_exclusive_group(required=True)
+    # method_group.add_argument('-m',
+    #                           '--method',
+    #                           type=str,
+    #                           help='Input fragment analysis file (fsa)',
+    #                           choices=methods_dict.keys())
+    #
+    # method_group.add_argument('-mp', '--method-path', type=str, help='Path to method yaml file')
+    #
+    # parser.add_argument('-l', '--log-file-path',  type=str, help='Save log to logfile')
+
+    methods_path = Path("fragment_analyzer/config/methods")
+    method_objects = methods_path.glob("*.yaml")
+    methods_dict = {}
+    for m in method_objects:
+        methods_dict[m.name.split('.')[0]] = m
+
+    args = get_arguments(list(methods_dict.keys()))
+    method_path = args.method_path if args.method_path else methods_dict[args.method]
 
     with open(method_path) as f:
         method = yaml.load(f, Loader=SafeLoader)
         logging.info(f'method path {method_path} loaded')
 
-    validate_method(method)
+    method_model = validate_method(method)
+
+    print(method_model)
 
     # if validator(method):
     #     logging.info(f'method definition ok')

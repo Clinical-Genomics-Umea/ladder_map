@@ -1,15 +1,54 @@
 from pathlib import Path
 from Bio import SeqIO
 import numpy as np
-
+from fragment_analyzer.method.method import Method
 from fragment_analyzer.utils.baseline_removal import baseline_arPLS
 
 
 class Fsa:
+    """
+    A class to represent a Fragment analysis data object.
+
+    ...
+
+    Attributes
+    ----------
+    file : str
+        file name
+    method : Method object
+        Pydantic method object  to be used
+    correct_baseline : bool
+        determines whether the baseline should be corrected
+
+    Methods
+    -------
+    get_channel_names():
+        Returns names of channels
+
+    get_channels():
+        Returns names of channels
+
+    _set_lookups():
+        populates dicts self.name_to_channel and self.channel_to_name
+
+    _apply_method():
+        calls self._set_ladder_data and self._set_raw_traces
+        optionally calls self._set_baseline_corrected_traces
+
+    _set_raw_traces():
+        populates dict self.traces_raw
+
+    set_method():
+        sets the dicts self.traces_raw and self.traces_corrected_baseline
+        sets the string variables self.ladder_channel self.ladder_name
+        sets the string variable self.method_name
+        calls the methods self._apply_method and self._set_lookups
+
+    """
     def __init__(
         self,
         file: str,
-        method: dict = None,
+        method: Method = None,
         correct_baseline: bool = False,
     ) -> None:
 
@@ -18,8 +57,8 @@ class Fsa:
         self.correct_baseline = correct_baseline
 
         if method is not None:
-            self.method_name = method.keys()[0]
-            self.method = method[self.method_name]
+            self.method_name = method.name
+            self.method = method
 
         self.filename = self.file.parts[-1]
         self.abif_raw = SeqIO.read(file, 'abi').annotations['abif_raw']
@@ -40,13 +79,13 @@ class Fsa:
     def get_channels(self):
         return self.channel_to_name.keys()
 
-    def get_names(self):
+    def get_channels_names(self):
         return self.name_to_channel.keys()
 
     def _set_lookups(self):
-        for item in self.method:
-            self.name_to_channel[item['name']] = item['channel']
-            self.channel_to_name[item['channel']] = item['name']
+        for channel in self.method.channels:
+            self.name_to_channel[channel.channel_name] = channel.channel
+            self.channel_to_name[channel.channel] = channel.channel_name
 
     def _apply_method(self):
         self._set_ladder_data()
@@ -55,21 +94,21 @@ class Fsa:
             self._set_baseline_corrected_traces()
 
     def _set_ladder_data(self):
-        for item in self.method:
-            if item['ladder']:
-                self.ladder_channel = item['channel']
-                self.ladder_name = item['name']
+        for channel in self.method.channels:
+            if channel.ladder:
+                self.ladder_channel = channel.channel
+                self.ladder_name = channel.channel_name
 
     def _set_baseline_corrected_traces(self):
-        for item in self.method:
-            self.traces_corrected_baseline[item['name']] = np.array(
-                baseline_arPLS(self.abif_raw[item['channel']])
+        for channel in self.method.channels:
+            self.traces_corrected_baseline[channel.channel_name] = np.array(
+                baseline_arPLS(self.abif_raw[channel.channel])
             )
 
     def _set_raw_traces(self):
-        for item in self.method:
-            self.traces_raw[item['name']] = np.array(
-                self.abif_raw[item['channel']]
+        for channel in self.method.channels:
+            self.traces_raw[channel.channel_name] = np.array(
+                self.abif_raw[channel.channel]
             )
 
     def set_method(self, method: dict):
@@ -78,8 +117,6 @@ class Fsa:
         self.ladder_channel = None
         self.ladder_name = None
 
-        self.method_name = method.keys()[0]
-        self.method = method[self.method_name]
         self._apply_method()
         self._set_lookups()
 
@@ -87,20 +124,4 @@ class Fsa:
         return f'Fsa(file=\'{self.file}\', filename=\'{self.filename}\', method=\'{self.method}\', method_name=\'{self.method_name}\', ' \
                f'corrected_baseline=\'{self.correct_baseline}\', ladder_channel=\'{self.ladder_channel}\', ladder_name=\'{self.ladder_name}\', ' \
                f'name_to_channel=\'{self.name_to_channel}\', channel_to_name=\'{self.channel_to_name}\')'
-
-
-
-    #
-    # def __repr__(self):
-    #     ladder_c = self.method_data[self.ladder_channel]
-    #     all_channels = [c for c in self.traces]
-    #     r = f"""
-    #         Fsa-object with following parameters:
-    #
-    #         File: {self.file}
-    #         Filename: {self.file_name}
-    #         Ladder data channel: {ladder_c}
-    #         All trace channels: {all_channels}
-    #         """
-    #     return r
 

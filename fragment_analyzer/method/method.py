@@ -1,10 +1,11 @@
 from pydantic import BaseModel, ValidationError, validator, root_validator
-from typing import List, Literal
+from typing import List, Literal, Optional
 import re
 import yaml
 from yaml.loader import SafeLoader
 import portion as P
 import itertools
+import logging
 
 with open('fragment_analyzer/config/method_validation_criteria.yaml') as f:
     c = yaml.load(f, Loader=SafeLoader)
@@ -37,39 +38,46 @@ class Allele(BaseModel):
 
 
 class Channel(BaseModel):
+    """
+    A Pydantic class for channel.
+    ...
+
+    Attributes
+    ----------
+    channel_name : str channel name
+    channel : Literal of allowed channels
+    dye : Literal of allowed dyes
+    desc : Optional string
+    alleles: List of Allele objects
+
+    Methods
+    -------
+    channel_name_test(cls, value):
+        Tests if value is matches the supplied regex
+
+    unique_allele_names(cls, values):
+        Validates that allele objects are unique
+
+    non_overlapping_allele_intervals(cls, values):
+        Validates that allele positions are non-overlapping
+
+    """
+
     channel_name: str
     channel: Literal[tuple(c['allowed_channels'])]
     dye: Literal[tuple(c['allowed_dyes'])]
     ladder: bool
-    desc: str
+    desc: Optional[str]
     alleles: List[Allele]
 
     @validator('channel_name')
-    def name_test(cls, v):
+    def channel_name_test(cls, v):
         if not re.search(c['channel_name_regex'], v):
             raise ValueError('Channel name invalid')
-        return v.title()
-
-    # @validator('channel')
-    # def name_test(cls, v):
-    #     if v not in c['allowed_channels']:
-    #         raise ValueError('Channel invalid')
-    #     return v.title()
-
-    # @validator('dye')
-    # def name_test(cls, v):
-    #     if v not in c['allowed_dyes']:
-    #         raise ValueError('Dye invalid')
-    #     return v.title()
-
-    # @validator('desc')
-    # def name_test(cls, v):
-    #     if not re.search(c['desc_regex'], v):
-    #         raise ValueError('Description invalid')
-    #     return v.title()
+        return v
 
     @root_validator()
-    def unique_allele_values(cls, values):
+    def unique_allele_names(cls, values):
 
         uq_fields = c['alleles_unique_fields']
         alleles_list = values.get('alleles')
@@ -100,49 +108,57 @@ class Channel(BaseModel):
 
 
 class Method(BaseModel):
+    """
+    A Pydantic class for method.
+    ...
+
+    Attributes
+    ----------
+    name : str
+        method name
+    channels : List of Channel objects
+        channel
+
+    Methods
+    -------
+    name_test(cls, value):
+        Tests if value is matches the supplied regex
+    """
     name: str
     channels: List[Channel]
 
     @validator('name')
     def name_test(cls, v):
+        """
+        Test if value is matches the supplied regex
+        :param v: name field
+        :return: name field if match is successful
+        """
+
         if not re.search(c['method_name_regex'], v):
             raise ValueError('Method name invalid')
-        return v.title()
-    #
-    # @root_validator(pre=True)
-    # def unique_values(cls, values):
-    #     root_values = values.get('channels')
-    #
-    #     fields = c['channels_unique_fields']
-    #     value_sets = {}
-    #     for f in fields:
-    #         value_sets[f] = set()
-    #
-    #     for value in root_values:
-    #         for f in fields:
-    #             if value[f] in value_sets[f]:
-    #                 raise ValueError(f'Duplicate in field {f}')
-    #             else:
-    #                 value_sets[f].add(value[f])
-    #
-    #     return values
+        return v
 
-    # @root_validator()
-    # def unique_channel_values(cls, values):
-    #
-    #     uq_fields = c['channels_unique_fields']
-    #     channel_list = values.get('channels')
-    #
-    #     for uf in uq_fields:
-    #         ch_vals = [getattr(ch, uf) for ch in channel_list]
-    #
-    #         ch_vals_set = set(ch_vals)
-    #         if len(ch_vals) != len(ch_vals_set):
-    #             raise ValueError(f'Duplicates in channel field {uf}')
-    #
-    #     return values
+def create_method_obj(method: dict, logger: logging.Logger = None) -> Method:
+    """
 
-def validate_method(method: dict):
-    return Method(**method)
+    :param method:
+    :param logger:
+    :return:
+    """
+    if logger:
+        try:
+            method_obj = Method(**method)
+            logger.info(f'Method {method_obj.name} validated')
+            return method_obj
+        except Exception as e:
+            logger.error(f"Validation of method failed")
+            for row in str(e).split('\n'):
+                logger.error(f"Validation error:     {row}")
 
+            exit(1)
+
+    else:
+        method_obj = Method(**method)
+        return method_obj
 

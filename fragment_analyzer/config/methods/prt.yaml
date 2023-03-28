@@ -36,7 +36,7 @@ channels:
         end: 18
       - allele_name: prt4_1
         start: 19
-        end: 22
+        end: 20
       - allele_name: prt4_2
         start: 21
         end: 22

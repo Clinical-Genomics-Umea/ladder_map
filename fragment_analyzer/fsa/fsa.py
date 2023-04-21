@@ -16,7 +16,7 @@ class Fsa:
     file : str
         file name
     method : Method object
-        Pydantic method object  to be used
+        Pydantic method object for on fsa data
     correct_baseline : bool
         determines whether the baseline should be corrected
 
@@ -48,12 +48,12 @@ class Fsa:
     def __init__(
         self,
         file: str,
-        method: Method = None,
+        method: Method,
         correct_baseline: bool = False,
     ) -> None:
 
         self.file = Path(file)
-        self.method = None
+        self.method = Method
         self.correct_baseline = correct_baseline
 
         if method is not None:
@@ -64,17 +64,28 @@ class Fsa:
         self.abif_raw = SeqIO.read(file, 'abi').annotations['abif_raw']
 
         self.traces_raw = {}
-        self.traces_corrected_baseline = {}
+        self.traces = {}
 
         self.ladder_channel = None
         self.ladder_name = None
         self.name_to_channel = {}
         self.channel_to_name = {}
 
+        self._set_raw_traces()
+        self._set_traces()
+
         if method is not None:
             self.method = method
             self._apply_method()
             self._set_lookups()
+
+
+    def set_correct_baselines(self):
+        for channel in self.method.channels:
+            self.traces[channel.channel_name] = np.array(
+                baseline_arPLS(self.abif_raw[channel.channel])
+            )
+        self.correct_baseline = True
 
     def get_channels(self):
         return self.channel_to_name.keys()
@@ -89,9 +100,6 @@ class Fsa:
 
     def _apply_method(self):
         self._set_ladder_data()
-        self._set_raw_traces()
-        if self.correct_baseline is True:
-            self._set_baseline_corrected_traces()
 
     def _set_ladder_data(self):
         for channel in self.method.channels:
@@ -99,11 +107,17 @@ class Fsa:
                 self.ladder_channel = channel.channel
                 self.ladder_name = channel.channel_name
 
-    def _set_baseline_corrected_traces(self):
-        for channel in self.method.channels:
-            self.traces_corrected_baseline[channel.channel_name] = np.array(
-                baseline_arPLS(self.abif_raw[channel.channel])
-            )
+    def _set_traces(self):
+        if self.correct_baseline is True:
+            for channel in self.method.channels:
+                self.traces[channel.channel_name] = np.array(
+                    baseline_arPLS(self.abif_raw[channel.channel])
+                )
+        else:
+            for channel in self.method.channels:
+                self.traces[channel.channel_name] = np.array(
+                    self.abif_raw[channel.channel]
+                )
 
     def _set_raw_traces(self):
         for channel in self.method.channels:
@@ -112,8 +126,9 @@ class Fsa:
             )
 
     def set_method(self, method: dict):
+        self.method = method
         self.traces_raw = {}
-        self.traces_corrected_baseline = {}
+        self.traces = {}
         self.ladder_channel = None
         self.ladder_name = None
 
@@ -124,4 +139,10 @@ class Fsa:
         return f'Fsa(file=\'{self.file}\', filename=\'{self.filename}\', method=\'{self.method}\', method_name=\'{self.method_name}\', ' \
                f'corrected_baseline=\'{self.correct_baseline}\', ladder_channel=\'{self.ladder_channel}\', ladder_name=\'{self.ladder_name}\', ' \
                f'name_to_channel=\'{self.name_to_channel}\', channel_to_name=\'{self.channel_to_name}\')'
+
+    def __str__(self):
+        return f'Fsa(file=\'{self.file}\', filename=\'{self.filename}\', method=\'{self.method}\', method_name=\'{self.method_name}\', ' \
+               f'corrected_baseline=\'{self.correct_baseline}\', ladder_channel=\'{self.ladder_channel}\', ladder_name=\'{self.ladder_name}\', ' \
+               f'name_to_channel=\'{self.name_to_channel}\', channel_to_name=\'{self.channel_to_name}\')'
+
 
